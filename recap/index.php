@@ -124,8 +124,92 @@ print_r($_REQUEST); // Gère à la fois les get et post
 
     <p>Nombre 1 (converti): <?= $nb1Float ?> | <?= gettype($nb1Float) ?></p>
     <p>Nombre 2 (converti): <?= $nb2Int ?> | <?= gettype($nb2Int) ?></p>
+
+    <h2>Comparaison: </h2>
+    <p>5 == "5": <?= 5 == "5" ?></p>
+    <p>5 === "5": <?= 5 === "5" ?></p>
+
+
+    <h3>Logique:</h3>
+
+    <p>true && true: <?= true && true ?></p>
+    <p>true && false: <?= true && false ?></p>
+    <p>false && false: <?= false && false ?></p>
+
+    <p>true || true: <?= true || true ?></p>
+    <p>true || false: <?= true || false ?></p>
+    <p>false || false: <?= false || false ?></p>
+
+    <p>!true: <?= !true ?></p>
+    <p>!false: <?= !false ?></p>
   </div>
 
+  <div>
+    <h2>Structures conditionnelles :</h2>
+
+    <?php
+    
+    if (true) {
+      echo "<p>Coucou</p>";
+    }
+
+    if (false) {
+      // Ceci ne sera pas exécuté
+    }
+    else {
+      // Ceci sera exécuté
+    }
+
+
+    if (false) {
+      // Ceci ne sera pas exécuté
+    }
+    else if (true) {
+      // Ceci sera exécuté
+    }
+    else {
+      // Ceci ne sera pas exécuté
+    }
+    
+
+    // switch (expression) {
+    //   case valeur:
+    //     // block d'instructions
+    //     break;
+    //   case valeur:
+    //     // block d'instructions
+    //     break;
+    //   case valeur:
+    //   case valeur:
+    //     // block d'instructions
+    //     break;
+    //   default:
+    //     // block d'instructions
+    //     break;
+    //}
+
+    ?>
+  </div>
+
+  <div>
+    <h2>Structures itératives</h2>
+
+    <?php
+    
+    // while (expression_booléenne) {
+    //   // Bloc d'instructions
+    // }
+
+    echo "<ul>";
+    // initialisation ; condition d'arrêt ; incrémentation
+    for ($i = 1; $i <= 10; $i++) { 
+      echo "<li>$i * 2 = " . $i * 2 . "</li>";
+    }
+    echo "</ul>";
+
+    ?>
+
+  </div>
 
 </body>
 
