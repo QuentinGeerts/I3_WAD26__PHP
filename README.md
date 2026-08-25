@@ -15,7 +15,8 @@ Ce README reprend, sous forme de synthèse pédagogique, l'ensemble de la théor
 9. [Structures conditionnelles](#9-structures-conditionnelles)
 10. [Structures itératives](#10-structures-itératives)
 11. [Les tableaux](#11-les-tableaux)
-12. [Fonctions utiles rencontrées](#12-fonctions-utiles-rencontrées)
+12. [Les fonctions](#12-les-fonctions)
+13. [Fonctions utiles rencontrées](#13-fonctions-utiles-rencontrées)
 
 ---
 
@@ -279,11 +280,255 @@ foreach ($tab as $value) {
 }
 ```
 
-📄 Voir [demo-tableaux/index.php](demo-tableaux/index.php) et [demo-tableaux/exercices/exercice01.php](demo-tableaux/exercices/exercice01.php)
+### 11.6. Informations sur un tableau
+
+```php
+count($jours);                          // nombre d'éléments : 31
+in_array("salade", $dinner);            // la valeur existe-t-elle ? → true/false
+array_key_exists("lundi", $dinner);     // la clé existe-t-elle ? → true/false
+
+array_keys($dinner);                    // tableau des clés
+array_values($dinner);                  // tableau des valeurs
+```
+
+### 11.7. Ajouter / retirer des éléments dynamiquement
+
+| Fonction | Rôle |
+|---|---|
+| `array_push($tab, ...$valeurs)` | Ajoute un ou plusieurs éléments **à la fin** |
+| `array_pop($tab)` | Retire et retourne le **dernier** élément |
+| `array_unshift($tab, ...$valeurs)` | Ajoute un ou plusieurs éléments **au début** |
+| `array_shift($tab)` | Retire et retourne le **premier** élément |
+
+```php
+$tab1 = [1, 2, 3, 4, 5];
+
+array_push($tab1, 6, 7);        // [1, 2, 3, 4, 5, 6, 7]
+$removed = array_pop($tab1);    // [1, 2, 3, 4, 5, 6] | $removed: 7
+
+array_unshift($tab1, -1, 0);    // [-1, 0, 1, 2, 3, 4, 5, 6]
+$removed = array_shift($tab1);  // [0, 1, 2, 3, 4, 5, 6] | $removed: -1
+```
+
+### 11.8. Transformer, filtrer et agréger un tableau
+
+Équivalents des méthodes `map`, `filter`, `join`... de JavaScript :
+
+```php
+// Transformer chaque élément (≈ JS: array.map())
+$transformed = array_map(fn($v) => $v + 10, $tab1);
+
+// Tableau → chaîne de caractères (≈ JS: Array.prototype.join())
+echo implode(", ", $transformed);
+
+// Chaîne de caractères → tableau (≈ JS: String.prototype.split())
+print_r(explode(", ", "10, 11, 12, 13, 14, 15, 16"));
+
+// Filtrer selon une condition (≈ JS: array.filter())
+$filtered = array_filter($tab1, fn($v) => $v % 2 == 0);
+
+// Agrégations
+$somme = array_sum($tab1);
+$min = min($tab1);
+$max = max($tab1);
+```
+
+📄 Voir [demo-tableaux/demo-tableau.php](demo-tableaux/demo-tableau.php), [demo-tableaux/exercices/exercice01.php](demo-tableaux/exercices/exercice01.php) et [demo-tableaux/exercices/exercice02.php](demo-tableaux/exercices/exercice02.php)
 
 ---
 
-## 12. Fonctions utiles rencontrées
+## 12. Les fonctions
+
+### 12.1. Anatomie d'une fonction
+
+```php
+// Fonction : retourne une valeur
+function addition(float $nb1, float $nb2): float
+{
+  return $nb1 + $nb2;
+}
+
+// Procédure : ne retourne pas de valeur (type de retour void)
+function afficher_message(string $message): void
+{
+  // ...
+}
+```
+
+On peut typer les paramètres et la valeur de retour (`float`, `string`, `void`, ...) — PHP vérifie alors ces types.
+
+### 12.2. Fonction vs méthode vs closure
+
+| Concept | Contexte | Exemple |
+|---|---|---|
+| **Fonction** | Global | `function addition($a, $b) { return $a + $b; }` |
+| **Méthode** | Classe (accès à `$this`) | `public function addition() { return $this->nb1 + $this->nb2; } ` |
+| **Closure (fonction fléchée)** | Stockée dans une variable → transportable | `$additionner = fn(float $a, float $b): float => $a + $b;` |
+
+```php
+$resultat = addition(5, 3);           // appel d'une fonction
+$resultat = $calculatrice->addition(); // appel d'une méthode sur un objet
+$resultat = $additionner(5, 3);        // appel d'une closure
+```
+
+### 12.3. Paramètres par défaut
+
+```php
+// RÈGLE : les paramètres optionnels sont toujours après les paramètres obligatoires
+function creerUtilisateur(string $nom, string $role = 'user', bool $actif = false)
+{
+  return compact('nom', 'role', 'actif');
+}
+
+$personne1 = creerUtilisateur('Geerts', 'admin', true);
+$personne2 = creerUtilisateur('Person'); // role et actif prennent leur valeur par défaut
+```
+
+`compact('nom', 'role', 'actif')` construit un tableau associatif à partir des variables locales du même nom (`["nom" => ..., "role" => ..., "actif" => ...]`).
+
+### 12.4. Arguments nommés
+
+On peut préciser le nom du paramètre lors de l'appel, ce qui permet de ne pas respecter l'ordre et de ne fournir que certains paramètres optionnels :
+
+```php
+$personne3 = creerUtilisateur('Morre', actif: true);
+$personne4 = creerUtilisateur(actif: true, nom: "Albert", role: 'admin');
+```
+
+### 12.5. Passage par valeur vs par référence
+
+Par défaut, PHP passe les **types simples** (int, float, string, bool) **par valeur** : une copie est transmise, les modifications dans la fonction ne touchent pas la variable d'origine.
+
+```php
+function passageParValeur(int $a): void
+{
+  $a++; // ne modifie que la copie locale
+}
+
+$nb = 5;
+passageParValeur($nb);
+// $nb vaut toujours 5
+```
+
+⚠️ Les **tableaux** sont eux aussi passés par valeur par défaut ; pour les passer **par référence**, on utilise l'opérateur `&` devant le paramètre :
+
+```php
+function passageParReferenceTableau(array &$tab): void
+{
+  $tab[0] = 42; // modifie directement le tableau d'origine
+}
+```
+
+Les **objets**, en revanche, sont toujours manipulés via leur référence : modifier une propriété dans une fonction modifie bien l'objet d'origine, sans avoir besoin du `&`.
+
+```php
+function passageParReferenceObjet(Voiture $voiture): void
+{
+  $voiture->couleur = "blanc"; // modifie l'objet original
+}
+```
+
+### 12.6. Fonction variadique (`...`)
+
+Permet de recevoir un nombre indéfini d'arguments, regroupés dans un tableau :
+
+```php
+function somme(float $default = 0, float ...$valeurs): float
+{
+  return array_sum($valeurs) + $default;
+}
+
+somme(1, 2, 3); // 6
+somme();        // 0
+```
+
+### 12.7. Spread operator (`...`)
+
+Permet de « déplier » un tableau existant dans un autre tableau ou dans une liste d'arguments :
+
+```php
+$t2 = [1, 2, 3];
+
+$t3 = [0, $t2];     // ⚠️ [0, [1, 2, 3]] → tableau qui contient un tableau
+$t4 = [0, ...$t2];  // [0, 1, 2, 3]      → éléments dépliés
+
+$t2_copy = [...$t2];       // copie du tableau
+$t_somme = somme(0, ...$t2); // les éléments de $t2 deviennent des arguments séparés
+```
+
+### 12.8. Destructuration
+
+Permet d'extraire plusieurs valeurs d'un tableau en une seule assignation.
+
+Tableau indexé :
+
+```php
+[$valeur1, $valeur2, /* valeur3 ignorée */, $valeur4] = $t2;
+```
+
+Tableau associatif (les clés du tableau doivent correspondre) :
+
+```php
+$personne = [
+  "nom" => "Geerts",
+  "prenom" => "Quentin",
+  "date-naissance" => "1996-04-03",
+];
+
+['nom' => $nom, 'prenom' => $prenom, 'date-naissance' => $date_naissance] = $personne;
+```
+
+### 12.9. Retour de type nullable
+
+Une fonction qui peut soit retourner un objet, soit ne rien trouver, peut typer son retour avec `Type|null` :
+
+```php
+function rechercheParId(array $personnes, int $id): Personne|null
+{
+  foreach ($personnes as $p) {
+    if ($p->id == $id) return $p;
+  }
+  return null;
+}
+```
+
+### 12.10. Callback (fonction passée en paramètre)
+
+Une fonction peut recevoir une autre fonction en paramètre (type `callable`), pour personnaliser son comportement — utile pour écrire ses propres fonctions génériques (ex. un `filter` maison) :
+
+```php
+function custom_filter(array $array, callable $compareFn): array
+{
+  $filtered = [];
+  foreach ($array as $element) {
+    if ($compareFn($element)) {
+      array_push($filtered, $element);
+    }
+  }
+  return $filtered;
+}
+```
+
+Un callback peut être fourni sous plusieurs formes :
+
+```php
+// 1. Nom de fonction sous forme de chaîne
+custom_filter($personnes, 'hasEvenId');
+
+// 2. Fonction anonyme
+custom_filter($personnes, function (Personne $p) {
+  return strtolower($p->prenom[0]) == "q";
+});
+
+// 3. Fonction fléchée (arrow function), plus concise
+custom_filter($personnes, fn(Personne $p) => strtolower($p->prenom[0]) == "e");
+```
+
+📄 Voir [demo-fonctions/demo-fonctions.php](demo-fonctions/demo-fonctions.php) et [demo-fonctions/exercices/exercices.md](demo-fonctions/exercices/exercices.md)
+
+---
+
+## 13. Fonctions utiles rencontrées
 
 | Fonction | Rôle |
 |---|---|
@@ -295,6 +540,20 @@ foreach ($tab as $value) {
 | `floatval($val)` | Convertit une valeur en nombre décimal (`float`) |
 | `intval($val)` | Convertit une valeur en nombre entier (`int`) |
 | `rand($min, $max)` | Génère un nombre entier aléatoire entre `$min` et `$max` |
+| `pow($base, $exposant)` (ou `**`) | Élève un nombre à une puissance |
+| `count($tab)` | Nombre d'éléments dans un tableau |
+| `in_array($valeur, $tab)` | Vérifie si une valeur est présente dans un tableau |
+| `array_key_exists($cle, $tab)` | Vérifie si une clé existe dans un tableau |
+| `array_keys($tab)` / `array_values($tab)` | Retourne les clés / les valeurs d'un tableau |
+| `array_push($tab, ...)` / `array_pop($tab)` | Ajoute / retire un élément en fin de tableau |
+| `array_unshift($tab, ...)` / `array_shift($tab)` | Ajoute / retire un élément en début de tableau |
+| `array_map($fn, $tab)` | Applique une fonction à chaque élément et retourne un nouveau tableau |
+| `array_filter($tab, $fn)` | Retourne les éléments qui valident une condition |
+| `array_sum($tab)` | Somme des éléments d'un tableau |
+| `min($tab)` / `max($tab)` | Plus petite / plus grande valeur d'un tableau |
+| `implode($separateur, $tab)` | Transforme un tableau en chaîne de caractères |
+| `explode($separateur, $chaine)` | Transforme une chaîne de caractères en tableau |
+| `compact(...$noms)` | Construit un tableau associatif à partir de variables locales |
 
 ---
 
@@ -305,5 +564,7 @@ foreach ($tab as $value) {
 ├── recap/                       → Récapitulatif général (variables, formulaires, opérateurs, conditions, boucles)
 ├── demo-tableaux/                → Démonstration sur les tableaux et foreach
 │   └── exercices/                → Énoncés et corrections d'exercices sur les tableaux
+├── demo-fonctions/               → Démonstration sur les fonctions (paramètres, références, callbacks, ...)
+│   └── exercices/                → Énoncés d'exercices sur les fonctions
 └── notes/                        → Notes diverses (ex. configuration de VS Code)
 ```
